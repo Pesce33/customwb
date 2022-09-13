@@ -1,0 +1,32 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build:
+    name: Build and Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: build frontend
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+      - run: cd frontend && npm install && yarn build
+      - run: rsync -av frontend/build/* static/
+      - run: rsync -av static/static/* static/
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: hsmade/minecraft-manager
+          tag_with_ref: true
