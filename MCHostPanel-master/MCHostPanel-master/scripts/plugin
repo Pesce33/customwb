@@ -1,0 +1,130 @@
+#!/bin/bash
+#Plugin instalation tool
+#Version: 0.2
+
+#Get extension:  echo ${F##*.} - thanks to dualbus on #bash - freenode
+#Get file name: echo ${F##*/}
+#Get base:  echo ${F%*.}
+#Check if http: if [[ $var = http* ]] - thanks to e36freak on #bash - freenode
+
+
+
+
+PLUGIN_DIR="/usr/local/mcwebmin/minecraft/plugins/"
+#Must be chowned to the user running this script.
+TMP_DIR="/usr/local/mcwebmin/tmp/plugininstall/"
+
+#MORE OR LESS FINISHED!
+install_local() {
+
+	mkdir $TMP_DIR
+	cd $TMP_DIR
+	#Move the archive to the temporary folder
+	mv $1 ./
+
+	#Get file name
+	PLUGIN_FILENAME=${1##*/}
+
+	#Get file extension
+	EXTENSION=${1##*.}
+	echo "Extension: $EXTENSION"
+
+	#Get the file path to the plugin. Nothing else can be in the /tmp/minecraft/ folder.
+	FILE_PATH="$TMP_DIR""$PLUGIN_FILENAME"
+
+	echo "File path: $FILE_PATH"
+
+	read
+
+	if [ "$EXTENSION" = "tar.gz" ] || [ "$EXTENSION" = "gz" ] || [ "$EXTENSION" = "tar" ]; then
+		tar -xf $FILE_PATH -C ./temp/
+		mv ./temp/* $PLUGIN_DIR
+	elif [ "$EXTENSION" = "zip" ]; then
+		unzip $FILE_PATH -d ./temp/
+		mv ./temp/* $PLUGIN_DIR
+	elif [ "$EXTENSION" = "jar" ]; then
+		mv $FILE_PATH $PLUGIN_DIR
+
+
+	else
+		echo "Unknown extension: $EXTENSION"
+		exit $?
+	fi
+
+	rm -r $TMP_DIR
+	exit 0
+}
+
+
+
+
+#NOT FINISHED YET!!!
+install_web() {
+	mkdir $TMP_DIR
+	cd $TMP_DIR
+
+	#Get file name from the address
+	WEB_FILE_NAME=${1##*/}
+	
+	echo "File name: $WEB_FILE_NAME"
+	
+	#Download the file
+	wget -q $1 --no-check-certificate
+	
+
+	#Get file extension
+	EXTENSION=${WEB_FILE_NAME##*.}
+	echo "Extension: $EXTENSION"
+	FILE_PATH="$TMP_DIR""$WEB_FILE_NAME"
+	echo "File path: $FILE_PATH"
+
+	#Decide what to do with the file
+	if [ "$EXTENSION" = "tar.gz" ] || [ "$EXTENSION" = "gz" ] || [ "$EXTENSION" = "tar" ]; then
+		tar -xf $FILE_PATH -C ./temp/
+		mv ./temp/* $PLUGIN_DIR
+	elif [ "$EXTENSION" = "zip" ]; then
+		unzip $FILE_PATH -d ./temp/
+		mv ./temp/* $PLUGIN_DIR
+	elif [ "$EXTENSION" = "jar" ]; then
+		mv $FILE_PATH $PLUGIN_DIR
+
+
+	else
+		echo "Unknown extension: $EXTENSION"
+		exit $?
+	fi
+
+	rm -r $TMP_DIR
+	
+exit 0
+
+
+}
+
+
+#Check the link / path, launch appropriate code.
+if [ -n "$1" ];then
+
+	if [[ "$1" = http* ]]; then
+		echo "Web"
+		read
+		install_web $1
+	elif [[ "$1" = /* ]]; then
+		echo "Local"
+		read
+		install_local $1
+	else
+		echo "Invalid first argument"
+		exit
+	fi
+
+
+else
+	echo "Invalid argument"
+	exit 1
+fi
+
+
+
+
+exit 0

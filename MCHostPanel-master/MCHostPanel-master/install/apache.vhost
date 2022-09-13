@@ -1,0 +1,23 @@
+
+	DocumentRoot /usr/local/mcwebmin/www
+	<Directory />
+		Options FollowSymLinks
+		AllowOverride None
+	</Directory>
+	<Directory /usr/local/mcwebmin/www/>
+		Options Indexes FollowSymLinks MultiViews
+		AllowOverride None
+		Order allow,deny
+		allow from all
+	</Directory>
+
+	<IfModule mpm_itk_module>
+		AssignUserId mcwebmin mcwebmin
+	</IfModule>
+
+#Comented out until it's fixed
+#	ErrorLog /usr/local/minecraft/log/error.log
+#		LogLevel warn
+#	CustomLog /usr/local/minecraft/log/access.log combined
+
+</VirtualHost>
